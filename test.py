@@ -26,8 +26,7 @@ window['-T-'].expand(True, True, True)      # Make the Text element expand to ta
 interframe_duration = Image.open(gif_filename).info['duration']     # get how long to delay between frames
 
 while True:
-    event, values = window.read()
-    if event == 'STOP':
-        for frame in ImageSequence.Iterator(Image.open(gif_filename)):
+    
+    for frame in ImageSequence.Iterator(Image.open(gif_filename)):
                 event, values = window.read(timeout=interframe_duration)
-    window['-IMAGE-'].update(data=ImageTk.PhotoImage(frame) )
+                window['-IMAGE-'].update(data=ImageTk.PhotoImage(frame) )
