@@ -6,7 +6,7 @@ import obspy
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import savefig
 from obspy.clients.seedlink import Client 
-client = Client('10.246.1.141')
+client = Client('discovery.ingv.it',port=39962)
 
 def plot_waveform(mseed):
     mseed.detrend("demean")
@@ -98,7 +98,7 @@ while True:
         print(endtime)
         start=starttime
         end=endtime
-        stream = client.get_waveforms("ET",'SOE2','','HH?',start,end)
+        stream = client.get_waveforms("IV",'CRE','','HH?',start,end)
         plot_waveform(stream)
         # try:
         #     # Get list of files in folder
