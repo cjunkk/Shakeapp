@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+sg.set_options(font=('Arial Bold', 16))
 import os.path
 import obspy
 import matplotlib.pyplot as plt
@@ -82,17 +83,12 @@ def mosaic():
 # First the window layout in 2 columns
 
 file_list_column = [
-    [
-        sg.Text("INGV ShakeApp")],
-    [    
-        sg.Button('START')],
-    [
-        sg.Button('STOP')
-    ],
-    [
-        sg.Button('SHOW')
-    ],
-
+    [sg.Text(text = "INGV ShakeApp", size=20, justification='center',expand_x=True)],
+    [sg.Image('INGV.png',
+   expand_x=True, expand_y=True )],
+    [sg.Button('START'),
+    sg.Button('STOP'),
+    sg.Button('SHOW')]
 ]
 
 # For now will only show the name of the file that was chosen
