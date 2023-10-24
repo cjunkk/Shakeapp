@@ -108,7 +108,7 @@ layout = [
     ]
 ]
 
-window = sg.Window("Image Viewer", layout)
+window = sg.Window("INGV Shaking Viewer", layout)
 
 # Run the Event Loop
 while True:
