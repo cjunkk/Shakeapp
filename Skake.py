@@ -1,13 +1,13 @@
-# img_viewer.py
-
 import PySimpleGUI as sg
 import os.path
 import obspy
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 from matplotlib.pyplot import savefig
-from obspy.clients.seedlink import Client 
+from obspy.clients.seedlink import Client
 client = Client('discovery.ingv.it',port=39962)
-#from plot_w import mosaic
+client = Client('10.246.4.95')
+from plot_w import mosaic
 def plot_waveform(mseed):
     mseed.detrend("demean")
     mseed.filter("bandpass", freqmin=2,freqmax=20) 
@@ -18,7 +18,7 @@ def plot_waveform(mseed):
     year=mseed[0].stats.starttime.year
     data = str(day)+"-"+str(month)+"-"+str(year)
     
-    hour=mseed[0].stats.starttime.hour
+    hour=mseed[0].stats.starttime.hour+1
     minute=mseed[0].stats.starttime.minute
     second=mseed[0].stats.starttime.second
     ora=str(hour)+":"+str(minute)
@@ -35,7 +35,7 @@ def plot_waveform(mseed):
     axs[2].plot(mseed.select(component="E")[0].times(), mseed.select(component="E")[0].data, label='E-W', color=(0.91,0.17,0.16),lw=2)
 
     axs[2].set_xlabel("Tempo (secondi)",fontsize=16)
-    axs[1].set_ylabel("Velocità (metri al secondo) ",fontsize=16)
+    axs[1].set_ylabel("Velocità del suolo ",fontsize=16)
     axs[0].set_title("Hai saltato a Lucca Comics il "+data+" alle ore "+ora,fontsize=18)
 
     axs[0].legend(fontsize=12)
@@ -44,6 +44,7 @@ def plot_waveform(mseed):
     plt.tight_layout()
     savefig('earthquake.png')
     return 
+
 def mosaic():
     fig, axd = plt.subplot_mosaic(
     [["lucca"],
@@ -131,9 +132,9 @@ while True:
         print(endtime)
         start=starttime
         end=endtime
-        stream = client.get_waveforms("IV",'CRE','','HH?',start,end)
+        stream = client.get_waveforms("AM",'R5DFA','00','EH?',start,end)
         plot_waveform(stream)
-        #mosaic()
+        mosaic()
         # try:
         #     # Get list of files in folder
         #     #file_list = os.listdir(folder)
