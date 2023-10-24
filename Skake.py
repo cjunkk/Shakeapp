@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import savefig
 from obspy.clients.seedlink import Client 
 client = Client('discovery.ingv.it',port=39962)
-
+#from plot_w import mosaic
 def plot_waveform(mseed):
     mseed.detrend("demean")
     mseed.filter("bandpass", freqmin=2,freqmax=20) 
@@ -44,7 +44,40 @@ def plot_waveform(mseed):
     plt.tight_layout()
     savefig('earthquake.png')
     return 
-
+def mosaic():
+    fig, axd = plt.subplot_mosaic(
+    [["lucca"],
+     ['linea'],
+     ["mseed"],
+     ['ingv']
+    ],
+    layout="constrained",
+    # "image" will contain a square image. We fine-tune the width so that
+    # there is no excess horizontal or vertical margin around the image.
+    height_ratios=[1.3,.5,4.5,.35],
+    width_ratios=[1],
+    )
+    #fig = plt.figure(dpi=300, tight_layout=True)
+    fig.set_size_inches(11.69, 8.27, forward=True)
+    fig.set_size_inches(11.69, 8.27, forward=True)
+    # Plot the MRI image
+    im=mpimg.imread('./logo-lcg-edizione-2023.png')
+    axd["lucca"].imshow(im)
+    axd["lucca"].axis('off')
+    im=mpimg.imread('./linea.png')
+    axd["linea"].imshow(im)
+    axd["linea"].axis('off')
+    im=mpimg.imread('./INGV_LOGO_STESO.png')
+    axd["ingv"].imshow(im)
+    axd["ingv"].axis('off')
+    im=mpimg.imread('./earthquake.png')
+    axd["mseed"].imshow(im)
+    axd["mseed"].axis('off')
+    plt.tight_layout()
+    #plt.show()
+    savefig('mosaic.png')
+    # plt.close()
+    return
 # First the window layout in 2 columns
 
 file_list_column = [
@@ -100,6 +133,7 @@ while True:
         end=endtime
         stream = client.get_waveforms("IV",'CRE','','HH?',start,end)
         plot_waveform(stream)
+        #mosaic()
         # try:
         #     # Get list of files in folder
         #     #file_list = os.listdir(folder)
@@ -110,7 +144,7 @@ while True:
             # start=starttime
             # command = ""
             # cmd = command
-            filename = 'earthquake.png'
+            filename = 'mosaic.png'
             #window["-TOUT-"].update(filename)
             window["-IMAGE-"].update(filename=filename)
 
