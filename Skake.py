@@ -4,6 +4,7 @@ import os.path
 import obspy
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import time
 from matplotlib.pyplot import savefig
 from obspy.clients.seedlink import Client
 client = Client('discovery.ingv.it',port=39962)
@@ -124,6 +125,7 @@ while True:
         # except:
         #     #file_list = []
     if event == "STOP":
+        time.sleep(10)
         endtime = obspy.UTCDateTime.now()
         print(endtime)
         start=starttime
