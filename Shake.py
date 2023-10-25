@@ -5,26 +5,39 @@ import obspy
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import time
+import requests
+import datetime
+import base64
+import qrcode
 from matplotlib.pyplot import savefig
 from obspy.clients.seedlink import Client
+from plot_w import mosaic
+# set Seedlink server
 client = Client('discovery.ingv.it',port=39962)
 client = Client('10.246.4.95')
-from plot_w import mosaic
+# Set API endpoint and headers
+url = "https://api.imgur.com/3/image"
+headers = {"Authorization": "Client-ID bd1de98fb9a0d89"}
+
 def plot_waveform(mseed):
     mseed.detrend("demean")
     mseed.filter("bandpass", freqmin=2,freqmax=20) 
     mseed.taper(0.05)
 
-    day=mseed[0].stats.starttime.day
-    month=mseed[0].stats.starttime.month
-    year=mseed[0].stats.starttime.year
+    utc=mseed[0].stats.starttime
+    dt = datetime.datetime.strptime(str(utc), "%Y-%m-%dT%H:%M:%S.%fZ")
+    print(dt.strftime("%H"),dt.strftime("%M"))
+
+    day=dt.strftime("%d")
+    month=dt.strftime("%m")
+    year=dt.strftime("%Y")
     data = str(day)+"-"+str(month)+"-"+str(year)
     
-    hour=mseed[0].stats.starttime.hour+1
-    minute=mseed[0].stats.starttime.minute
-    second=mseed[0].stats.starttime.second
-    ora=str(hour)+":"+str(minute)
-
+    hour=dt.strftime("%H")
+    minute=dt.strftime("%M")
+    second=dt.strftime("%S")
+    ora=str(hour)+":"+str(minute)+":"+str(second)
+    
     fig = plt.figure(figsize=(15, 7))
 
     axs = fig.subplots(3, 1, sharex=True, gridspec_kw={'hspace': 0})
@@ -84,13 +97,15 @@ def mosaic():
 # First the window layout in 2 columns
 
 file_list_column = [
-    [sg.Text(text = "INGV ShakeApp", size=20, justification='center',expand_x=True)],
+    #[sg.Text(text = "INGV ShakeApp", size=20, justification='center',expand_x=True)],
     [sg.Image('INGV.png',
    expand_x=True, expand_y=True )],
     [sg.Button('START'),
     sg.Button('STOP'),
-    sg.Button('SHOW')]
-]
+    sg.Button('SHOW'),
+    sg.Button("PRINT"),
+    sg.Button("QRCODE")]
+    ]
 
 # For now will only show the name of the file that was chosen
 image_viewer_column = [
@@ -138,7 +153,35 @@ while True:
         #     #file_list = os.listdir(folder)
         # except:
         #     #file_list = []
-    elif event == "SHOW":  # A file was chosen from the listbox
+    if event == "QRCODE":  # A file was chosen from the listbox
+        try:
+            with open("mosaic.png", "rb") as file:
+                data = file.read()
+                base64_data = base64.b64encode(data)
+                # Upload image to Imgur and get URL
+                response = requests.post(url, headers=headers, data={"image": base64_data})
+                url = response.json()["data"]["link"]
+                print(url)
+                qr = qrcode.QRCode(version=3, box_size=20, border=10, error_correction=qrcode.constants.ERROR_CORRECT_H)
+                # Define the data to be encoded in the QR code
+                data = url
+                # Add the data to the QR code object
+                qr.add_data(data)
+                # Make the QR code
+                qr.make(fit=True)
+                # Create an image from the QR code with a black fill color and white background
+                img = qr.make_image(fill_color="black", back_color="white")
+                # Save the QR code image
+                img.save("qr_code.png")
+            # start=starttime
+            # command = ""
+            # cmd = command
+            filename = 'qr_code.png'
+            #window["-TOUT-"].update(filename)
+            window["-IMAGE-"].update(filename=filename)
+        except:
+            pass
+    if event == "SHOW":  # A file was chosen from the listbox
         try:
             # start=starttime
             # command = ""
