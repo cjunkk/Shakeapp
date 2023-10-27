@@ -146,7 +146,7 @@ while True:
         # except:
         #     #file_list = []
     if event == "STOP":
-        time.sleep(5)
+        time.sleep(1)
         endtime = obspy.UTCDateTime.now()
         print(endtime)
         start=starttime
