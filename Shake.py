@@ -9,12 +9,14 @@ import requests
 import datetime
 import base64
 import qrcode
+import io
+from PIL import Image
 from matplotlib.pyplot import savefig
 from obspy.clients.seedlink import Client
 from plot_w import mosaic
 # set Seedlink server
 client = Client('discovery.ingv.it',port=39962)
-client = Client('10.246.4.95')
+client = Client('rs-2.local')
 # Set API endpoint and headers
 url = "https://api.imgur.com/3/image"
 headers = {"Authorization": "Client-ID bd1de98fb9a0d89"}
@@ -92,14 +94,18 @@ def mosaic():
     plt.tight_layout()
     #plt.show()
     savefig('mosaic.png')
+    img = Image.open('mosaic.png')
+    width, height = img.size
+    smig = img.resize((width//2,height//2))
+    smig.save('smosaic.png','PNG')
     # plt.close()
     return
-# First the window layout in 2 columns
 
+# First the window layout in 2 columns
 file_list_column = [
     #[sg.Text(text = "INGV ShakeApp", size=20, justification='center',expand_x=True)],
-    [sg.Image('INGV.png',
-   expand_x=True, expand_y=True )],
+    [sg.Image('INGV.png')],
+    [sg.HSeparator()],
     [sg.Button('START'),
     sg.Button('STOP'),
     sg.Button('SHOW'),
@@ -123,7 +129,7 @@ layout = [
     ]
 ]
 
-window = sg.Window("INGV Shaking Viewer", layout)
+window = sg.Window("INGV Shaking Viewer", layout,resizable=True)
 
 # Run the Event Loop
 while True:
@@ -145,7 +151,7 @@ while True:
         print(endtime)
         start=starttime
         end=endtime
-        stream = client.get_waveforms("AM",'R5DFA','00','EH?',start,end)
+        stream = client.get_waveforms("AM",'R08EF','00','EH?',start,end)
         plot_waveform(stream)
         mosaic()
         # try:
@@ -162,7 +168,7 @@ while True:
                 response = requests.post(url, headers=headers, data={"image": base64_data})
                 url = response.json()["data"]["link"]
                 print(url)
-                qr = qrcode.QRCode(version=3, box_size=20, border=10, error_correction=qrcode.constants.ERROR_CORRECT_H)
+                qr = qrcode.QRCode(version=3, box_size=10, border=5, error_correction=qrcode.constants.ERROR_CORRECT_H)
                 # Define the data to be encoded in the QR code
                 data = url
                 # Add the data to the QR code object
@@ -186,10 +192,15 @@ while True:
             # start=starttime
             # command = ""
             # cmd = command
-            filename = 'mosaic.png'
+            filename = 'smosaic.png'
             #window["-TOUT-"].update(filename)
             window["-IMAGE-"].update(filename=filename)
 
+        except:
+            pass
+    if event == "PRINT":  # print image
+        try:
+            os.system('lp mosaic.png')
         except:
             pass
 
